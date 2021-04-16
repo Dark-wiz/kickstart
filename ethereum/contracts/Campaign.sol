@@ -27,6 +27,12 @@ contract Campaign{
     uint public minimumContribution;
     mapping(address => bool) public approvers;
     uint public approversCount;
+
+    
+    modifier restricted(){
+        require(msg.sender == manager);
+        _;
+    }
     
     function Campaign(uint minimum, address creator ) public payable{
         manager = creator;
@@ -40,8 +46,7 @@ contract Campaign{
         approversCount++; 
     }
     
-    function createRequest(string description, uint value, address recipient) public restricted(){
-        require(approvers[msg.sender]);
+    function createRequest(string description, uint value, address recipient) public restricted{
         Request memory  newRequest = Request({
             description: description,
             value: value,
@@ -61,7 +66,7 @@ contract Campaign{
         request.approvalCount++; 
     }
     
-    function finalizeRequest(uint index) public restricted(){
+    function finalizeRequest(uint index) public restricted{
         Request storage request = requests[index];
         
         require(request.approvalCount > (approversCount/2));
@@ -71,8 +76,4 @@ contract Campaign{
         request.complete = true;
     }
     
-    modifier restricted(){
-        require(msg.sender == manager);
-        _;
-    }
 }
